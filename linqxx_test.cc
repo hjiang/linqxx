@@ -41,7 +41,8 @@ TEST_F(LinqxxTest, Where) {
 
 TEST_F(LinqxxTest, Select) {
     EXPECT_EQ(3, from(guests_).select<int>(&_1 ->* &Person::age).count());
-    shared_ptr<vector<int> > results = from(guests_)
+    shared_ptr<vector<int> > results =
+            from(guests_)
             .select<int>(&_1 ->* &Person::age)
             .get();
     EXPECT_EQ(3, results->size());
@@ -56,6 +57,25 @@ TEST_F(LinqxxTest, NonOwningInitialization) {
     vector<Person> people;
     people.push_back(Person("Joe", 20));
     EXPECT_EQ(1, from(&people).map<int>(&_1 ->* &Person::age).count());
+}
+
+TEST_F(LinqxxTest, Insert) {
+    guests_->push_back(Person("joe", 18));
+    DataSet<vector<Person> > results =
+            insert(
+                    from(guests_)
+                    .where(&_1 ->* &Person::age > 30)
+                   )
+            .into(
+                    from(guests_).where(&_1 ->* &Person::name == "joe"));
+    EXPECT_EQ(2, results.count());
+
+    shared_ptr<vector<int> > ages =
+            results
+            .select<int>(&_1 ->* &Person::age)
+            .get();
+    EXPECT_EQ(1, count(ages->begin(), ages->end(), 32));
+    EXPECT_EQ(1, count(ages->begin(), ages->end(), 18));
 }
 
 }  // anonymous namespace
