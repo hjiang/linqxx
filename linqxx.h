@@ -17,6 +17,9 @@ template<typename T>
 class DataSet {
   public:
     DataSet(shared_ptr<T>);
+
+    shared_ptr<T> get();
+
     unsigned int count();
     DataSet<T> where(function<bool (typename T::value_type)> pred);
 
@@ -28,7 +31,7 @@ class DataSet {
     // Map is an alias of select.
     template<typename S>
     DataSet<vector<S> > map(function<S (typename T::value_type)> sel) {
-        select<S>(sel);
+        return select<S>(sel);
     }
 
   private:
@@ -37,6 +40,11 @@ class DataSet {
 
 template<typename T>
 DataSet<T>::DataSet(shared_ptr<T> container) : container_(container) {}
+
+template<typename T>
+shared_ptr<T> DataSet<T>::get() {
+    return container_;
+}
 
 template<typename T>
 unsigned int DataSet<T>::count() {

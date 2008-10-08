@@ -41,6 +41,11 @@ TEST_F(LinqxxTest, Where) {
 
 TEST_F(LinqxxTest, Select) {
     EXPECT_EQ(3, from(guests_).select<int>(&_1 ->* &Person::age).count());
+    shared_ptr<vector<int> > results = from(guests_)
+            .select<int>(&_1 ->* &Person::age)
+            .get();
+    EXPECT_EQ(3, results->size());
+    EXPECT_EQ(32, (*results)[0]);
 }
 
 TEST_F(LinqxxTest, Map) {
