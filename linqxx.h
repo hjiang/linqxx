@@ -3,6 +3,7 @@
 
 #include <vector>
 
+#include <boost/foreach.hpp>
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -13,12 +14,12 @@ using boost::shared_ptr;
 using boost::function;
 
 // T is usually an STL container.
-template<typename T>
+template<typename T, typename TPtr = shared_ptr<T> >
 class DataSet {
   public:
-    DataSet(shared_ptr<T>);
+    DataSet(TPtr);
 
-    shared_ptr<T> get();
+    TPtr get();
 
     unsigned int count();
     DataSet<T> where(function<bool (typename T::value_type)> pred);
@@ -35,24 +36,24 @@ class DataSet {
     }
 
   private:
-    shared_ptr<T> container_;
+    TPtr container_;
 };
 
-template<typename T>
-DataSet<T>::DataSet(shared_ptr<T> container) : container_(container) {}
+template<typename T, typename TPtr>
+DataSet<T, TPtr>::DataSet(TPtr container) : container_(container) {}
 
-template<typename T>
-shared_ptr<T> DataSet<T>::get() {
+template<typename T, typename TPtr>
+TPtr DataSet<T, TPtr>::get() {
     return container_;
 }
 
-template<typename T>
-unsigned int DataSet<T>::count() {
+template<typename T, typename TPtr>
+unsigned int DataSet<T, TPtr>::count() {
     return container_->size();
 }
 
-template<typename T>
-DataSet<T> DataSet<T>::where(function<bool (typename T::value_type)> pred) {
+template<typename T, typename TPtr>
+DataSet<T> DataSet<T, TPtr>::where(function<bool (typename T::value_type)> pred) {
     shared_ptr<T> new_container(new T());
     for (typename T::const_iterator i = container_->begin();
          i != container_->end(); ++i) {
@@ -63,9 +64,9 @@ DataSet<T> DataSet<T>::where(function<bool (typename T::value_type)> pred) {
     return DataSet<T>(new_container);
 }
 
-template<typename T>
+template<typename T, typename TPtr>
 template<typename S>
-DataSet<vector<S> > DataSet<T>::select(function<S (typename T::value_type)> sel) {
+DataSet<vector<S> > DataSet<T, TPtr>::select(function<S (typename T::value_type)> sel) {
     shared_ptr<vector<S> > new_container(new vector<S>());
     for (typename T::const_iterator i = container_->begin();
          i != container_->end(); ++i) {
@@ -77,6 +78,11 @@ DataSet<vector<S> > DataSet<T>::select(function<S (typename T::value_type)> sel)
 template<typename T>
 DataSet<T> from(shared_ptr<T> source) {
     return DataSet<T>(source);
+}
+
+template<typename T>
+DataSet<T, T*> from(T* source) {
+    return DataSet<T, T*>(source);
 }
 
 }  // namespace linqxx

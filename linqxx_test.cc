@@ -52,5 +52,11 @@ TEST_F(LinqxxTest, Map) {
     EXPECT_EQ(3, from(guests_).map<int>(&_1 ->* &Person::age).count());
 }
 
+TEST_F(LinqxxTest, NonOwningInitialization) {
+    vector<Person> people;
+    people.push_back(Person("Joe", 20));
+    EXPECT_EQ(1, from(&people).map<int>(&_1 ->* &Person::age).count());
+}
+
 }  // anonymous namespace
 }  // namespace linqxx
